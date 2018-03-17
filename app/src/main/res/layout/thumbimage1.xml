@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:layout_marginLeft="10dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/thumbimage1_back"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@android:drawable/editbox_background"
+        android:backgroundTint="@color/colorPrimary"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/thumbimage1_image"
+        android:src="@drawable/shirt1"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@android:color/background_light"/>
+
+    <TextView
+        android:textSize="12dp"
+        android:id="@+id/thumbimage1_colorname"
+        android:layout_width="60dp"
+        android:layout_height="15dp"
+        android:gravity="center"
+        android:layout_below="@id/thumbimage1_image"
+        android:text="Baby Blue"
+        android:textColor="@color/common_google_signin_btn_text_dark_focused"
+        android:visibility="gone"/>
+
+</RelativeLayout>

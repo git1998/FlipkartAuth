@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:layout_marginRight="20dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/SV_back"
+        android:layout_width="100dp"
+        android:layout_height="120dp"
+        android:background="@android:drawable/editbox_background"
+        android:backgroundTint="@color/colorPrimary"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_width="90dp"
+        android:layout_height="110dp"
+        android:background="@android:color/background_light"/>
+
+    <ImageView
+        android:id="@+id/SV_thumbimage"
+        android:src="@drawable/shirt1"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_width="60dp"
+        android:layout_height="70dp"
+        android:background="@android:color/background_light"/>
+
+    <TextView
+        android:textSize="12dp"
+        android:id="@+id/SV_colorname"
+        android:layout_width="100dp"
+        android:layout_height="15dp"
+        android:gravity="center"
+        android:layout_marginTop="5dp"
+        android:layout_below="@id/SV_thumbimage"
+        android:text="Baby Blue"
+        android:textColor="@color/common_google_signin_btn_text_dark_focused"/>
+
+</RelativeLayout>
