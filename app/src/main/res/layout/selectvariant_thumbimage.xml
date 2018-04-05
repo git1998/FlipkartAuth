@@ -38,6 +38,7 @@
         android:layout_marginTop="5dp"
         android:layout_below="@id/SV_thumbimage"
         android:text="Baby Blue"
+        android:visibility="gone"
         android:textColor="@color/common_google_signin_btn_text_dark_focused"/>
 
 </RelativeLayout>

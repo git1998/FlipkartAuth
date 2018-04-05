@@ -11,7 +11,7 @@
         android:layout_height="60dp"
         android:background="@android:drawable/editbox_background"
         android:backgroundTint="@color/colorPrimary"
-        android:visibility="gone"/>
+        android:visibility="invisible"/>
 
     <ImageView
         android:id="@+id/thumbimage1_image"
