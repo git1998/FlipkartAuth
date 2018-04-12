@@ -36,7 +36,6 @@ public class CartActivity extends AppCompatActivity implements CartListFragment.
             Intent intent = new Intent(this, AuthActivity.class);
             intent.putExtra("annonymsID",mUser.getUid());
             startActivity(intent);
-            finish();
         }
         else
             Toast.makeText(CartActivity.this,"Proceed to checkout",Toast.LENGTH_SHORT).show();

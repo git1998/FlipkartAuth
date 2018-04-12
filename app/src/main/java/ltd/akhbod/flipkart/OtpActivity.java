@@ -1,5 +1,6 @@
 package ltd.akhbod.flipkart;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,9 +16,7 @@ import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -26,19 +25,26 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.EmailAuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.auth.UserInfo;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class OtpActivity extends AppCompatActivity {
 
-    private static final String TAG = "sms";
+    private static final String TAG = "abhijit";
     private BroadcastReceiver smsBroadcastReceiver;
     IntentFilter filter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
     public static final String SMS_BUNDLE = "pdus";
@@ -58,9 +64,10 @@ public class OtpActivity extends AppCompatActivity {
     FirebaseUser annonymsUserUsed;
     FirebaseAuth.AuthStateListener AuthStateListener;
 
-    public OtpActivity() {
-    }
-
+    Dialog addUnitDialog;
+    DatabaseReference ref;
+    ListDetails obj[];
+    ArrayList<ListDetails> object = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,7 +126,6 @@ public class OtpActivity extends AppCompatActivity {
                 phoneNo=mPhone.getEditText().getText().toString();
                 startPhoneNumberVarification("+91"+phoneNo);
 
-                final Dialog addUnitDialog;
                 addUnitDialog = new Dialog(OtpActivity.this);
                 addUnitDialog.setContentView(R.layout.dialgo_otp);
                 addUnitDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -136,10 +142,10 @@ public class OtpActivity extends AppCompatActivity {
                 mNext.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-                        PhoneAuthCredential credential=PhoneAuthProvider.getCredential(mVerificationId,mOtpCode.getEditText().getText().toString());
-                       // signInWIthCredential(credential);
-                        link(credential,annonymsUser.getUid());
+                        String otp=mOtpCode.getEditText().getText().toString();
+                        AuthCredential emailAuthCredential =  EmailAuthProvider.getCredential(phoneNo+"@gmail.com", password);
+                        PhoneAuthCredential credential=PhoneAuthProvider.getCredential(mVerificationId,otp);
+                        link(emailAuthCredential,credential);
 
                     }});
 
@@ -153,8 +159,9 @@ public class OtpActivity extends AppCompatActivity {
             public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
                 Log.d("abhi", "onVerificationCompleted: ");
                 mVerificationInProgress=false;
-             //   AuthCredential credential = EmailAuthProvider.getCredential(phoneNo+"@gmail.com", password);
-              //  link(credential);
+
+                AuthCredential emailAuthCredential =  EmailAuthProvider.getCredential(phoneNo+"@gmail.com", password);
+                link(emailAuthCredential,phoneAuthCredential);
             }
 
             @Override
@@ -233,7 +240,7 @@ public class OtpActivity extends AppCompatActivity {
     }
 
 
-    private void link(AuthCredential credential, String id) {
+    private void link(AuthCredential credential, final PhoneAuthCredential phoneAuthCredential) {
 
     //String id = user.getUid();
     String id2 = annonymsUser.getUid();
@@ -243,18 +250,23 @@ public class OtpActivity extends AppCompatActivity {
         Toast.makeText(OtpActivity.this, "Not Annonyms",
                 Toast.LENGTH_SHORT).show();}
 
+                FirebaseAuth firebaseAuth=FirebaseAuth.getInstance();
+
         annonymsUser.linkWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "linkWithCredential:success");
+                            Log.d("stageAuthentication", "linkWithCredential:success");
                             FirebaseUser muser = task.getResult().getUser();
                             Toast.makeText(OtpActivity.this, "link: success.",
                                     Toast.LENGTH_SHORT).show();
 
+                            signInWIthCredential(phoneAuthCredential);
+
+
                         } else {
-                            Log.w(TAG, "linkWithCredential:failure", task.getException());
+                            Log.d("stageAuthentication", "linkWithCredential:failed");
                             Toast.makeText(OtpActivity.this, "link: failed.",
                                     Toast.LENGTH_SHORT).show();
 
@@ -268,43 +280,108 @@ public class OtpActivity extends AppCompatActivity {
 
     private void signInWIthCredential(PhoneAuthCredential credential) {
 
+        String firebaseUser=mAuth.getCurrentUser().getUid();
+        Log.d("firebaseusers","user2="+firebaseUser);
+
+
+
+
+            ref = FirebaseDatabase.getInstance().getReference().child("users").child(annonymsUser.getUid().toString());
+            //Firebase
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    for (DataSnapshot snap : dataSnapshot.getChildren()) {
+
+                        object.add(snap.getValue(ListDetails.class));
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }});
+
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
-                            final String id = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                            Toast.makeText(getApplicationContext(),"account varified",Toast.LENGTH_SHORT).show();
+                            Log.d("stageAuthentication", "signInWithCredential:success");
+
+
                             mAuth.getCurrentUser().delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
 
-                                    Toast.makeText(getApplicationContext(),"account varified",Toast.LENGTH_SHORT).show();
-
-                                    AuthCredential emailAuthCredential =  EmailAuthProvider.getCredential(phoneNo+"@gmail.com", password);
-                                    link(emailAuthCredential,id);
-
+                                    Toast.makeText(getApplicationContext(),"account deleted",Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(getApplicationContext(), AuthActivity.class);
+                                    Bundle args = new Bundle();
+                                    args.putSerializable("ARRAYLIST",(Serializable)object);
+                                    intent.putExtra("BUNDLE",args);
+                                    startActivity(intent);
+                                    finish();
                                 }});
 
-
-                            FirebaseUser user = task.getResult().getUser();
-
-                            // ...
                         } else {
-                            // Sign in failed, display a message and update the UI
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
-                                // The verification code entered was invalid
-                                Toast.makeText(getApplicationContext(),"account not varified",Toast.LENGTH_SHORT).show();
-
-                            }
+                            Log.d("stageAuthentication", "signInWithCredential:failed");
+                            unlink();
                         }
                     }
                 });
+
+
     }
 
+    public void unlink(){
 
+        final FirebaseUser user=mAuth.getCurrentUser();
+        List<? extends UserInfo> providerData = user.getProviderData();
+        final String providerId[] = new String[2];
+        int i=0;
+
+        for (UserInfo userInfo : providerData ) {
+            Log.d(TAG, "providerId = " + userInfo.getProviderId());
+            providerId[i] = userInfo.getProviderId();
+            i++;
+        }
+
+
+            if (providerId[1].equals("password")) {
+
+                Log.d("stageAuthentication", "unlinking starts");
+                user.unlink(providerId[1])
+                        .addOnCompleteListener(this,
+                                new OnCompleteListener<AuthResult>() {
+
+                                    @Override
+                                    public void onComplete(@NonNull Task<AuthResult> task) {
+                                        if (task.isSuccessful()) {
+
+                                            Log.d("stageAuthentication", "unlink :success");
+                                            Toast.makeText(getApplicationContext(),"unlink success",Toast.LENGTH_SHORT).show();
+
+
+                                        }
+                                        else {
+                                            Log.d("stageAuthentication", "unlink firebase:failed");
+                                        }
+
+                                        addUnitDialog.dismiss();
+                                    }
+                                });
+            }
+
+        if(user.isAnonymous()){  Toast.makeText(OtpActivity.this, "is Annonyms"+user.getUid().toString(),
+                Toast.LENGTH_SHORT).show(); }
+        else {
+            Toast.makeText(OtpActivity.this, "Not Annonyms",
+                    Toast.LENGTH_SHORT).show();}
+
+        }
 
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {

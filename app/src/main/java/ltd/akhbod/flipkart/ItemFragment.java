@@ -121,7 +121,7 @@ public class ItemFragment extends Fragment {
             public void onClick(View v) {
                 obj.setSelectedSize(size.get(selectedSize)+" "+finalPrice.getText()+" "+baseprice.get(selectedSize)+" "+discount.get(selectedSize));
                 String push=databaseReference.push().getKey();
-                databaseReference.child("cart").child(auth.getCurrentUser().getUid()).child(push).setValue(obj).addOnSuccessListener(new OnSuccessListener<Void>() {
+                databaseReference.child("users").child(auth.getCurrentUser().getUid()).child(push).setValue(obj).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(c,"Successfully Added to cart!!",Toast.LENGTH_SHORT).show();
